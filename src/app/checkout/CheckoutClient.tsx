@@ -1,0 +1,499 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+    Typography,
+    Divider,
+    Row,
+    Col,
+    Empty,
+    Form,
+    Radio,
+    Tag,
+    Alert,
+    Select,
+    InputNumber,
+} from "antd";
+import { useRouter } from "next/navigation";
+import AppButton from "@/components/common/AppButton";
+import AppCard from "@/components/common/AppCard";
+import AppInput from "@/components/common/AppInput";
+import { useCart } from "@/hooks/useCart";
+import toast from "@/utils/toast";
+import { formatCurrency } from "@/utils/price";
+import { useWatch } from "antd/es/form/Form";
+import { bangladeshDistricts } from "@/data";
+import { FiX } from "react-icons/fi";
+import { API_URL } from "@/lib/api";
+import FloatingChat from "@/components/FloatingChat/FloatingChat";
+
+const { Title, Text } = Typography;
+
+const DELIVERY_CHARGE = {
+    dhaka: 80,
+    outside: 150,
+};
+
+interface CheckoutFormValues {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+    district?: string;
+    deliveryArea?: "dhaka" | "outside";
+    address?: string;
+    paymentMethod?: "cod" | "bkash" | "nagad";
+    walletNumber?: string;
+    transactionId?: string;
+}
+
+export default function CheckoutClient() {
+    const { cartItems, clearCart, updateQuantity, removeFromCart } = useCart();
+    const router = useRouter();
+    const [form] = Form.useForm<CheckoutFormValues>();
+    const [mounted, setMounted] = useState(false);
+
+    const paymentMethod = useWatch("paymentMethod", form);
+    const deliveryArea = useWatch("deliveryArea", form);
+
+    const [couponCode, setCouponCode] = useState("");
+    const [checkingCoupon, setCheckingCoupon] = useState(false);
+    const [couponMessage, setCouponMessage] = useState<{
+        type: "success" | "error";
+        text: string;
+    } | null>(null);
+    const [appliedCoupon, setAppliedCoupon] = useState<{
+        code: string;
+        discountAmount: number;
+        minOrderValue?: number;
+    } | null>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const subTotal = cartItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    );
+
+    const deliveryFee = deliveryArea ? DELIVERY_CHARGE[deliveryArea] : 0;
+    const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+    const totalAmount = subTotal + deliveryFee - discount;
+
+    useEffect(() => {
+        if (
+            appliedCoupon &&
+            appliedCoupon.minOrderValue &&
+            subTotal < appliedCoupon.minOrderValue
+        ) {
+            setAppliedCoupon(null);
+            if (subTotal > 0) {
+                setCouponMessage({
+                    type: "error",
+                    text: `Coupon removed. Minimum order ৳${appliedCoupon.minOrderValue} required.`,
+                });
+                toast.error(
+                    `Coupon removed. Minimum order ৳${appliedCoupon.minOrderValue} required.`
+                );
+            } else {
+                setCouponMessage(null);
+            }
+        }
+    }, [subTotal, appliedCoupon]);
+
+    const checkCoupon = async () => {
+        if (!couponCode) return;
+        setCheckingCoupon(true);
+        setCouponMessage(null);
+        try {
+            const res = await fetch(`${API_URL}/coupons/validate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: couponCode, orderAmount: subTotal }),
+            });
+            const data = await res.json();
+            if (res.ok && data.valid) {
+                setAppliedCoupon({
+                    code: data.code,
+                    discountAmount: data.discountAmount,
+                    minOrderValue: data.minOrderValue,
+                });
+                setCouponMessage({
+                    type: "success",
+                    text: `Coupon applied! You save ৳${data.discountAmount}`,
+                });
+            } else {
+                setAppliedCoupon(null);
+                setCouponMessage({ type: "error", text: data.message || "Invalid coupon" });
+            }
+        } catch {
+            setAppliedCoupon(null);
+            setCouponMessage({ type: "error", text: "Error checking coupon" });
+        } finally {
+            setCheckingCoupon(false);
+        }
+    };
+
+    const handlePlaceOrder = async (values: CheckoutFormValues) => {
+        try {
+            const orderPayload = {
+                orderItems: cartItems.map((item) => ({
+                    name: item.title,
+                    qty: item.quantity,
+                    image: item.image,
+                    price: item.price,
+                    product: item.id,
+                    size: item.selectedSize,
+                    color: item.selectedColor,
+                })),
+                shippingAddress: {
+                    address: values.address,
+                    city: values.district,
+                    country: "Bangladesh",
+                },
+                paymentMethod: values.paymentMethod,
+                itemsPrice: subTotal,
+                taxPrice: 0,
+                shippingPrice: deliveryFee,
+                totalPrice: totalAmount,
+                customerInfo: {
+                    name: values.fullName,
+                    phone: values.phone,
+                    email: values.email,
+                },
+                couponCode: appliedCoupon?.code,
+            };
+
+            const res = await fetch(`${API_URL}/orders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderPayload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to place order");
+            }
+
+            toast.success("অর্ডার সফলভাবে প্লেস করা হয়েছে 🎉");
+
+            // Store order data in sessionStorage for order success page
+            sessionStorage.setItem("orderData", JSON.stringify({
+                orderId: data.orderId || data._id,
+                total: totalAmount,
+                paymentMethod: values.paymentMethod,
+                address: values.address,
+                items: cartItems,
+                customerName: values.fullName,
+                customerPhone: values.phone,
+                customerEmail: values.email || "customer@email.com",
+                deliveryCharge: deliveryFee,
+                discount: discount,
+            }));
+
+            clearCart();
+            router.push("/order-success");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Order failed. Please try again.";
+            console.error(err);
+            toast.error(errorMessage);
+        }
+    };
+
+    if (!mounted) {
+        return null;
+    }
+
+    if (!cartItems.length) {
+        return (
+            <div className="min-h-screen flex items-center justify-center px-4">
+                <AppCard className="w-full max-w-lg rounded-2xl shadow-sm text-center p-8">
+                    <div className="flex justify-center mb-4">
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+                        আপনার কার্ট এখন খালি
+                    </h2>
+                    <p className="text-gray-500 mb-6">
+                        পছন্দের পণ্য যোগ করে সহজেই শপিং শুরু করুন
+                    </p>
+                    <AppButton
+                        type="primary"
+                        size="large"
+                        className="px-10 h-12 text-base rounded-lg"
+                        onClick={() => router.push("/")}
+                    >
+                        🛍️ শপিং শুরু করুন
+                    </AppButton>
+                </AppCard>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="min-h-screen p-4 md:p-8">
+                <div className="max-w-6xl mx-auto">
+                    <Title level={2}>Checkout</Title>
+
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        initialValues={{
+                            paymentMethod: "cod",
+                            deliveryArea: "dhaka",
+                        }}
+                        onFinish={handlePlaceOrder}
+                        className="mt-6"
+                    >
+                        <Row gutter={[24, 24]}>
+                            {/* ORDER SUMMARY */}
+                            <Col xs={24} md={12}>
+                                <AppCard title="🧾 Order Summary" bordered={false}>
+                                    {cartItems.map((item) => (
+                                        <div
+                                            key={`${item.id}-${item.selectedSize}-${item.selectedColor}`}
+                                            className="flex justify-between items-start gap-2 mb-4"
+                                        >
+                                            <div className="flex-1 min-w-0">
+                                                <Text
+                                                    strong
+                                                    className="block truncate md:whitespace-normal md:line-clamp-2 pb-1"
+                                                >
+                                                    {item.title}
+                                                </Text>
+                                                <Text type="secondary" className="block text-xs mb-1">
+                                                    Size: {item.selectedSize || "N/A"} | Color:{" "}
+                                                    {item.selectedColor || "N/A"}
+                                                </Text>
+                                                <Text type="secondary" className="text-sm!">
+                                                    {formatCurrency(item.price)} x
+                                                    <InputNumber
+                                                        className="ml-2! w-14!"
+                                                        min={1}
+                                                        max={10}
+                                                        value={item.quantity}
+                                                        onChange={(value: number | null) =>
+                                                            updateQuantity(
+                                                                item.id,
+                                                                value || 1,
+                                                                item.selectedSize,
+                                                                item.selectedColor
+                                                            )
+                                                        }
+                                                    />
+                                                    <AppButton
+                                                        type="text"
+                                                        className="ml-2!"
+                                                        danger
+                                                        icon={<FiX />}
+                                                        onClick={() =>
+                                                            removeFromCart(item.id, item.selectedSize, item.selectedColor)
+                                                        }
+                                                    />
+                                                </Text>
+                                            </div>
+                                            <Text strong className="whitespace-nowrap">
+                                                {formatCurrency(item.price * item.quantity)}
+                                            </Text>
+                                        </div>
+                                    ))}
+
+                                    <Divider />
+
+                                    <div className="flex gap-2 mb-2">
+                                        <AppInput
+                                            className="w-1/3!"
+                                            placeholder="Promo Code"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value)}
+                                        />
+                                        <AppButton type="primary" onClick={checkCoupon} loading={checkingCoupon}>
+                                            Apply
+                                        </AppButton>
+                                    </div>
+
+                                    {couponMessage && (
+                                        <Text
+                                            type={couponMessage.type === "success" ? "success" : "danger"}
+                                            className="text-xs block mb-2"
+                                        >
+                                            {couponMessage.text}
+                                        </Text>
+                                    )}
+
+                                    {discount > 0 && (
+                                        <div className="flex justify-between">
+                                            <Text strong className="text-violet-500!">
+                                                Discount
+                                            </Text>
+                                            <Text strong type="success" className="text-violet-500!">
+                                                - {formatCurrency(discount)}
+                                            </Text>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between">
+                                        <Text strong>Subtotal</Text>
+                                        <Text strong>{formatCurrency(subTotal)}</Text>
+                                    </div>
+
+                                    <div className="flex justify-between">
+                                        <Text strong>Delivery Charge</Text>
+                                        <Text strong>{formatCurrency(deliveryFee)}</Text>
+                                    </div>
+
+                                    <Divider />
+
+                                    <div className="flex justify-between items-center">
+                                        <Text strong className="text-lg!">
+                                            Total Amount
+                                        </Text>
+                                        <Text strong className="text-lg!">
+                                            {formatCurrency(totalAmount)}
+                                        </Text>
+                                    </div>
+
+                                    <Tag color="violet" className="mt-2!">
+                                        <span className="text-[10px] md:text-xs lg:text-xs">
+                                            ✔ Cash on Delivery available all over Bangladesh
+                                        </span>
+                                    </Tag>
+                                </AppCard>
+                            </Col>
+
+                            {/* SHIPPING & PAYMENT */}
+                            <Col xs={24} md={12}>
+                                <Text className="ml-2!" type="secondary">
+                                    সঠিক তথ্য দিন, আমরা দ্রুত ডেলিভারি দেব 🚚
+                                </Text>
+                                <AppCard
+                                    title="📦 Shipping & Payment"
+                                    bordered={false}
+                                    className="md:sticky"
+                                >
+                                    <Form.Item
+                                        label="Full Name"
+                                        name="fullName"
+                                        rules={[{ required: true, message: "নাম লিখুন" }]}
+                                    >
+                                        <AppInput placeholder="আপনার পুরো নাম" />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label="Mobile Number"
+                                        name="phone"
+                                        rules={[{ required: true, message: "মোবাইল নাম্বার দিন" }]}
+                                    >
+                                        <AppInput placeholder="মোবাইল নাম্বার দিন" />
+                                    </Form.Item>
+
+                                    <Form.Item label="Email Address (Optional)" name="email">
+                                        <AppInput placeholder="ইমেইল ঠিকানা দিন" />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label="District"
+                                        name="district"
+                                        rules={[{ required: true, message: "জেলা নির্বাচন করুন" }]}
+                                    >
+                                        <Select
+                                            showSearch
+                                            size="large"
+                                            placeholder="জেলা নির্বাচন করুন"
+                                            virtual={false}
+                                            getPopupContainer={(node) => node.parentElement!}
+                                            optionFilterProp="label"
+                                            filterOption={(input, option) =>
+                                                (option?.value as string)
+                                                    .toLowerCase()
+                                                    .includes(input.toLowerCase())
+                                            }
+                                            onChange={(value) => {
+                                                form.setFieldsValue({
+                                                    deliveryArea: value === "Dhaka" ? "dhaka" : "outside",
+                                                });
+                                            }}
+                                            options={bangladeshDistricts.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
+                                        />
+                                    </Form.Item>
+
+                                    <Form.Item name="deliveryArea" rules={[{ required: true }]}>
+                                        <Radio.Group disabled>
+                                            <Radio value="dhaka">
+                                                Inside Dhaka {formatCurrency(DELIVERY_CHARGE.dhaka)}
+                                            </Radio>
+                                            <Radio value="outside">
+                                                Outside Dhaka {formatCurrency(DELIVERY_CHARGE.outside)}
+                                            </Radio>
+                                        </Radio.Group>
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label="Delivery Address"
+                                        name="address"
+                                        rules={[{ required: true, message: "ঠিকানা লিখুন" }]}
+                                    >
+                                        <AppInput.TextArea rows={3} placeholder="বাসা/রোড/এলাকা, জেলা" />
+                                    </Form.Item>
+
+                                    <Form.Item label="Payment Method" name="paymentMethod">
+                                        <Radio.Group className="w-full">
+                                            <Radio value="cod">
+                                                Cash on Delivery
+                                                <Tag color="violet" className="ml-2!">
+                                                    Popular
+                                                </Tag>
+                                            </Radio>
+                                            <Radio value="bkash">bKash</Radio>
+                                            <Radio value="nagad">Nagad</Radio>
+                                        </Radio.Group>
+                                    </Form.Item>
+
+                                    {(paymentMethod === "bkash" || paymentMethod === "nagad") && (
+                                        <>
+                                            <Alert
+                                                type="info"
+                                                showIcon
+                                                className="mb-3!"
+                                                title="Payment Instruction"
+                                                description={`অনুগ্রহ করে 01751876070 Personal ${paymentMethod} এ ${formatCurrency(
+                                                    totalAmount
+                                                )} ক্যাশ ইন অথবা সেন্ড মানি করুন এবং Transaction ID দিন`}
+                                            />
+
+                                            <Form.Item
+                                                label="Wallet Number"
+                                                name="walletNumber"
+                                                rules={[{ required: true, message: "নাম্বার দিন" }]}
+                                            >
+                                                <AppInput placeholder="01XXXXXXXXX" />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                label="Transaction ID"
+                                                name="transactionId"
+                                                rules={[{ required: true, message: "Txn ID দিন" }]}
+                                            >
+                                                <AppInput placeholder="Transaction ID" />
+                                            </Form.Item>
+                                        </>
+                                    )}
+
+                                    <AppButton type="primary" size="large" block htmlType="submit">
+                                        Confirm Order ({formatCurrency(totalAmount)})
+                                    </AppButton>
+                                </AppCard>
+                            </Col>
+                        </Row>
+                    </Form>
+                </div>
+            </div>
+            <FloatingChat />
+        </>
+    );
+}
