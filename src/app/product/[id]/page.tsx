@@ -1,4 +1,4 @@
-import { getProductById, getRelatedProducts } from "@/lib/api";
+import { getProductById, getRelatedProducts } from "@/lib/products/productsApi";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProductDetailClient from "./ProductDetailClient";
@@ -45,13 +45,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
 }
 
+export const revalidate = 60; // Revalidate every 60 seconds
+
 export default async function ProductDetailPage({ params }: Props) {
     const { id } = await params;
     const product = await getProductById(id);
 
     if (!product) {
         notFound();
-        return null; // TypeScript narrowing - notFound() never returns but TS doesn't know
+        return null;
     }
 
     const relatedProducts = await getRelatedProducts(id);

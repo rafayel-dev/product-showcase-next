@@ -1,10 +1,7 @@
-import type { Product, Review, Slide } from "@/types";
+import { BASE_URL, API_URL } from "../apiConstants";
+import type { Product, Review } from "@/types";
 
-export const BASE_URL = "http://localhost:5000";
-// export const BASE_URL ="https://ceiling-publishing-permits-stunning.trycloudflare.com";
-export const API_URL = `${BASE_URL}/api`;
-
-const mapProduct = (item: Record<string, unknown>): Product => ({
+export const mapProduct = (item: Record<string, unknown>): Product => ({
   id: (item.id || item._id) as string,
   title: (item.productName || item.title) as string,
   sku: item.sku as string,
@@ -42,7 +39,6 @@ const mapProduct = (item: Record<string, unknown>): Product => ({
     ((item.reviews as Review[]) ? (item.reviews as Review[]).length : 0),
 });
 
-// Server-side fetch with caching for products list
 export async function getProducts(
   page: number = 1,
   limit: number = 50,
@@ -50,25 +46,13 @@ export async function getProducts(
   try {
     const res = await fetch(
       `${API_URL}/products?page=${page}&limit=${limit}&isPublished=true`,
-      { next: { revalidate: 60 } }, // Cache for 60 seconds
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) throw new Error("Failed to fetch products");
     const data = await res.json();
     return (data.products || []).map(mapProduct);
   } catch (error) {
     console.error(error);
-    return [];
-  }
-}
-
-export async function getCategories(): Promise<{ id: string; name: string }[]> {
-  try {
-    const res = await fetch(`${API_URL}/categories`, {
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
     return [];
   }
 }
@@ -106,7 +90,6 @@ export async function getRelatedProducts(
   }
 }
 
-// Client-side only functions (no caching headers)
 export async function createReview(
   productId: string,
   review: { rating: number; comment: string; name: string; orderId: string },
@@ -134,25 +117,6 @@ export async function getProductReviews(
     );
     if (!res.ok) return [];
     return await res.json();
-  } catch {
-    return [];
-  }
-}
-
-export async function getSliders(): Promise<Slide[]> {
-  try {
-    const res = await fetch(`${API_URL}/sliders`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.map((item: Record<string, unknown>) => ({
-      image: (item.image as string).startsWith("http")
-        ? item.image
-        : `${BASE_URL}${item.image}`,
-      alt: (item.title as string) || "Slider Image",
-      link: item.link as string,
-    }));
   } catch {
     return [];
   }

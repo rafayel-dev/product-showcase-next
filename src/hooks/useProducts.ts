@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Product } from "@/types";
-import { getProducts } from "@/lib/api";
+import { getProducts } from "@/lib/products/productsApi";
 
 const initialLoadCount = 20;
 const productsPerLoad = 10;

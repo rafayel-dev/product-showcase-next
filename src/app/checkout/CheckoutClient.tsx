@@ -24,7 +24,8 @@ import { formatCurrency } from "@/utils/price";
 import { useWatch } from "antd/es/form/Form";
 import { bangladeshDistricts } from "@/data";
 import { FiX } from "react-icons/fi";
-import { API_URL } from "@/lib/api";
+import { validateCoupon } from "@/lib/checkout/checkoutApi";
+import { createOrder } from "@/lib/orders/ordersApi";
 import FloatingChat from "@/components/FloatingChat/FloatingChat";
 
 const { Title, Text } = Typography;
@@ -106,13 +107,8 @@ export default function CheckoutClient() {
         setCheckingCoupon(true);
         setCouponMessage(null);
         try {
-            const res = await fetch(`${API_URL}/coupons/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: couponCode, orderAmount: subTotal }),
-            });
-            const data = await res.json();
-            if (res.ok && data.valid) {
+            const data = await validateCoupon(couponCode, subTotal);
+            if (data.valid) {
                 setAppliedCoupon({
                     code: data.code,
                     discountAmount: data.discountAmount,
@@ -164,17 +160,7 @@ export default function CheckoutClient() {
                 couponCode: appliedCoupon?.code,
             };
 
-            const res = await fetch(`${API_URL}/orders`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderPayload),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Failed to place order");
-            }
+            const data = await createOrder(orderPayload);
 
             toast.success("অর্ডার সফলভাবে প্লেস করা হয়েছে 🎉");
 

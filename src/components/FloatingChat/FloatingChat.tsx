@@ -17,7 +17,7 @@ import {
     markAdminMessagesAsRead,
     type IMessage,
 } from "@/lib/chatService";
-import { BASE_URL } from "@/lib/api";
+import { BASE_URL } from "@/lib/apiConstants";
 
 interface LocalMessage extends IMessage {
     isRead?: boolean;
@@ -37,6 +37,23 @@ const FloatingChat: React.FC = () => {
     const unreadCount = messages.filter(
         (m) => m.sender === "admin" && !m.isRead
     ).length;
+
+    const fetchChat = async (id: string) => {
+        try {
+            const chat = await getActiveChat(undefined, id);
+            if (chat) {
+                if (chat.messages) setMessages(chat.messages);
+                if (chat._id) {
+                    chatIdRef.current = chat._id;
+                    if (socketRef.current?.connected) {
+                        socketRef.current.emit("join_chat", chat._id);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch chat", error);
+        }
+    };
 
     useEffect(() => {
         let storedId = localStorage.getItem("guest_chat_id");
@@ -84,23 +101,6 @@ const FloatingChat: React.FC = () => {
             if (socketRef.current) socketRef.current.disconnect();
         };
     }, []);
-
-    const fetchChat = async (id: string) => {
-        try {
-            const chat = await getActiveChat(undefined, id);
-            if (chat) {
-                if (chat.messages) setMessages(chat.messages);
-                if (chat._id) {
-                    chatIdRef.current = chat._id;
-                    if (socketRef.current?.connected) {
-                        socketRef.current.emit("join_chat", chat._id);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("Failed to fetch chat", error);
-        }
-    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -266,22 +266,10 @@ const FloatingChat: React.FC = () => {
                             isOpen ? (
                                 <CloseOutlined className="text-white! text-2xl! transition-transform duration-200 group-hover:rotate-90" />
                             ) : (
-                                <MessageOutlined className="text-white! text-2xl! transition-transform duration-200 group-hover:-rotate-12" />
+                                <MessageOutlined className="text-white! text-2xl! transition-transform duration-200 group-hover:-rotate-8" />
                             )
                         }
-                        className="
-              relative z-10 
-              h-14! w-14!
-              bg-violet-600! border-none!
-              flex items-center justify-center
-              shadow-lg
-              transition-all duration-300
-
-              hover:bg-violet-700!
-              hover:scale-110
-              hover:shadow-2xl hover:shadow-violet-500/40
-              active:scale-95
-            "
+                        className="relative z-10 h-14! w-14! bg-violet-600! border-none! flex items-center justify-center shadow-lg transition-all duration-300 hover:bg-violet-700! hover:scale-110 hover:shadow-2xl hover:shadow-violet-500/40 active:scale-95"
                     >
                         <Badge
                             className="z-50! absolute! -top-2! -right-2!"

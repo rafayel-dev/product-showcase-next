@@ -9,7 +9,12 @@ import Slider from "@/components/features/Slider/Slider";
 import { useProducts } from "@/hooks/useProducts";
 import AppSpin from "@/components/common/AppSpin";
 import type { Product, Slide } from "@/types";
-import WhatsAppFloat from "@/components/FloatingChat/WhatsAppFloat";
+
+import dynamic from "next/dynamic";
+
+const WhatsAppFloat = dynamic(() => import("@/components/FloatingChat/WhatsAppFloat"), {
+    ssr: false,
+});
 
 const { Title } = Typography;
 const { Option } = Select;

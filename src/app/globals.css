@@ -19,7 +19,27 @@ body {
 
 /* Custom font class */
 .font-nunito {
-  font-family: var(--font-nunito), system-ui, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif !important;
+}
+
+/* Ant Design Global Font Overrides */
+:where(
+  .ant-app,
+  .ant-typography,
+  .ant-btn,
+  .ant-input,
+  .ant-select,
+  .ant-modal,
+  .ant-drawer,
+  .ant-card,
+  .ant-table
+) {
+  font-family: var(--font-nunito), system-ui, sans-serif !important;
+}
+
+/* Ensure Tailwind prose uses Nunito */
+.prose {
+  font-family: var(--font-nunito), system-ui, sans-serif !important;
 }
 
 /* Ant Design overrides for violet theme */

@@ -32,8 +32,15 @@ import {
 import { FaFacebook, FaTwitter } from "react-icons/fa";
 import { useCart } from "@/hooks/useCart";
 import toast from "@/utils/toast";
-import { createReview, getProductReviews } from "@/lib/api";
-import FloatingChat from "@/components/FloatingChat/FloatingChat";
+import {
+    getProductReviews,
+    createReview,
+} from "@/lib/products/productsApi";
+import dynamic from "next/dynamic";
+
+const FloatingChat = dynamic(() => import("@/components/FloatingChat/FloatingChat"), {
+    ssr: false,
+});
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -191,13 +198,13 @@ export default function ProductDetailClient({
     const whatsappOrder = () => {
         const msg = `Hello, আমি এই পণ্যটি অর্ডার করতে চাই 👇
 
-Product: ${product.title}
-SKU: ${product.sku}
-Size: ${size}
-Color: ${color}
-Quantity: ${qty}
-Price: ৳${finalPrice * qty}
-`;
+        SKU: ${product.sku}
+        Product: ${product.title}
+        Size: ${size}
+        Color: ${color}
+        Quantity: ${qty}
+        Price: ৳${finalPrice * qty}
+        `;
         window.open(
             `https://wa.me/8801751876070?text=${encodeURIComponent(msg)}`,
             "_blank"
@@ -508,6 +515,10 @@ Price: ৳${finalPrice * qty}
                                         icon={<WhatsAppOutlined />}
                                         className="bg-green-500! text-white! hover:bg-green-600! border-none! text-lg!"
                                         onClick={whatsappOrder}
+                                        disabled={
+                                            product.status === "Out of Stock" ||
+                                            product.status === "Discontinued"
+                                        }
                                     >
                                         Order via WhatsApp
                                     </AppButton>
@@ -613,8 +624,8 @@ Price: ৳${finalPrice * qty}
                                     <Paragraph className="whitespace-pre-line">
                                         {product.productDetails?.deliveryInfo ||
                                             `• ঢাকা শহরের ভিতরে: 1–2 কর্মদিবস
-• ঢাকার বাইরে: 2–4 কর্মদিবস
-• Cash on Delivery available`}
+                                            • ঢাকার বাইরে: 2–4 কর্মদিবস
+                                            • Cash on Delivery available`}
                                     </Paragraph>
                                 </Col>
 
@@ -623,8 +634,8 @@ Price: ৳${finalPrice * qty}
                                     <Paragraph className="whitespace-pre-line">
                                         {product.productDetails?.returnPolicy ||
                                             `• ৭ দিনের মধ্যে রিটার্ন সুবিধা
-• পণ্য ব্যবহার না করা থাকতে হবে
-• রিটার্ন চার্জ প্রযোজ্য হতে পারে`}
+                                            • পণ্য ব্যবহার না করা থাকতে হবে
+                                            • রিটার্ন চার্জ প্রযোজ্য হতে পারে`}
                                     </Paragraph>
                                 </Col>
                             </Row>

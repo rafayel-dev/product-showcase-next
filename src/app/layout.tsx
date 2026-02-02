@@ -5,7 +5,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { CartProvider } from "@/context/CartContext";
 import Header from "@/components/layouts/Header";
 import Footer from "@/components/layouts/Footer";
-import CartDrawer from "@/components/Cart/CartDrawer";
+import CartDrawerDynamic from "@/components/Cart/CartDrawerDynamic";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -51,11 +51,10 @@ export default function RootLayout({
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <CartDrawer />
+            <CartDrawerDynamic />
           </CartProvider>
         </AntdRegistry>
       </body>
     </html>
   );
 }
-

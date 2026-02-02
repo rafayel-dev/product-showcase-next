@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
+import { getSettings } from "@/lib/settings/settingsApi";
 
 export const metadata: Metadata = {
     title: "About Us",
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
     },
 };
 
-export default function AboutPage() {
-    return <AboutClient />;
+export const revalidate = 60; // Revalidate every 60 seconds
+
+export default async function AboutPage() {
+    const data = await getSettings("about");
+    return <AboutClient initialData={data} />;
 }
