@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+// import Image from "next/image";
 import type { CartItem, Product, Review } from "@/types";
 import ProductList from "@/components/features/Product/ProductList";
 import {
-    Image as AntImage,
+    Image,
     Typography,
     Rate,
     Row,
@@ -295,14 +295,19 @@ export default function ProductDetailClient({
                             <AppCard bordered={false}>
                                 <div className="relative">
                                     <div className="relative w-full aspect-square overflow-hidden rounded-lg">
-                                        <Image
-                                            src={selectedImage}
-                                            alt={product.title}
-                                            fill
-                                            sizes="(max-width: 768px) 100vw, 50vw"
-                                            className="object-cover"
-                                            priority
-                                        />
+                                        <Image.PreviewGroup
+                                            items={(product.imageUrls && product.imageUrls.length > 0
+                                                ? product.imageUrls
+                                                : [product.image]
+                                            ).map((img) => img)}
+                                        >
+                                            <Image
+                                                src={selectedImage}
+                                                alt={product.title}
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                                className="object-cover cursor-pointer"
+                                            />
+                                        </Image.PreviewGroup>
                                     </div>
 
                                     {hasDiscount && (
@@ -320,13 +325,13 @@ export default function ProductDetailClient({
                                         ? product.imageUrls
                                         : [product.image]
                                     ).map((img, i) => (
-                                        <AntImage
+                                        <Image
                                             key={i}
                                             src={img}
                                             width={70}
                                             preview={false}
                                             onClick={() => setSelectedImage(img)}
-                                            className={`cursor-pointer rounded aspect-square object-cover ${selectedImage === img ? "border-2 border-violet-500" : ""
+                                            className={`cursor-pointer rounded aspect-square object-cover ${selectedImage === img ? "border-1 border-violet-500" : ""
                                                 }`}
                                         />
                                     ))}
@@ -463,25 +468,25 @@ export default function ProductDetailClient({
                                         )}
 
                                     <div className="mb-6">
-                                        <Text strong>Quantity:</Text>
-                                        <Space className="ml-2!">
+                                        <div className="flex items-center gap-2">
+                                            <Text strong>Quantity:</Text>
                                             <AppButton
                                                 className="text-violet-500! hover:text-violet-600! hover:border-violet-500!"
-                                                icon={<MinusOutlined />}
+                                                icon={<MinusOutlined style={{ fontSize: "12px" }} />}
                                                 onClick={() => setQty(Math.max(1, qty - 1))}
                                             />
                                             <Text>{qty}</Text>
                                             <AppButton
                                                 className="text-violet-500! hover:text-violet-600! hover:border-violet-500!"
-                                                icon={<PlusOutlined />}
+                                                icon={<PlusOutlined style={{ fontSize: "12px" }} />}
                                                 onClick={() => setQty(Math.min(10, qty + 1))}
                                             />
-                                        </Space>
+                                        </div>
                                     </div>
                                 </Space>
 
                                 {/* ACTION BUTTONS */}
-                                <Space orientation="vertical" className="w-full">
+                                <div className="w-full flex flex-col gap-2">
                                     <AppButton
                                         size="large"
                                         className="text-lg! text-violet-500! hover:text-violet-600! hover:border-violet-500!"
@@ -510,9 +515,8 @@ export default function ProductDetailClient({
                                     </AppButton>
 
                                     <AppButton
-                                        size="large"
                                         block
-                                        icon={<WhatsAppOutlined />}
+                                        size="large"
                                         className="bg-green-500! text-white! hover:bg-green-600! border-none! text-lg!"
                                         onClick={whatsappOrder}
                                         disabled={
@@ -520,9 +524,9 @@ export default function ProductDetailClient({
                                             product.status === "Discontinued"
                                         }
                                     >
-                                        Order via WhatsApp
+                                        <WhatsAppOutlined style={{ fontSize: "20px" }} />Order via WhatsApp
                                     </AppButton>
-                                </Space>
+                                </div>
                             </AppCard>
                         </Col>
                     </Row>

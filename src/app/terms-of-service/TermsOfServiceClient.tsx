@@ -182,8 +182,8 @@ const Section = ({ icon, title, color, children }: any) => (
 );
 
 const ContactCard = ({ label, value }: any) => (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 group hover:border-violet-200 transition-colors">
-        <Text type="secondary" className="text-xs uppercase font-bold tracking-widest text-gray-400 group-hover:text-violet-400">
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+        <Text type="secondary" className="text-xs uppercase font-bold tracking-widest text-gray-400">
             {label}
         </Text>
         <Paragraph className="m-0 font-bold text-violet-700 text-lg">

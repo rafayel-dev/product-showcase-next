@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactCompiler: true,
+  reactCompiler: false,
   images: {
     remotePatterns: [
       {
@@ -17,8 +17,16 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     unoptimized: process.env.NODE_ENV === "development",
   },
-  // Allow loading images from private IPs (localhost) in development
-  allowedDevOrigins: ["http://localhost:5000"],
+  // Allow loading images from private IPs (localhost) and the current network IP in development
+  // This prevents Next.js from triggering refreshes when HMR connections are blocked
+  // We include multiple formats to ensure the dev server recognizes the origin correctly
+  allowedDevOrigins: [
+    "http://localhost:3000",
+    "http://10.10.20.43:3000",
+    "10.10.20.43:3000",
+    "10.10.20.43",
+    "http://localhost:5000",
+  ],
 };
 
 export default nextConfig;

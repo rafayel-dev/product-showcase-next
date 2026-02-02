@@ -26,10 +26,10 @@ const Header = () => {
                         priority
                     />
                 </Link>
-                <div className="flex items-center">
-                    <Badge count={totalItems} showZero>
+                <div className="flex! items-center!">
+                    <Badge count={totalItems} color="purple" showZero>
                         <BsCart3
-                            className="h-6 w-6 text-gray-700 hover:text-gray-900 cursor-pointer"
+                            className="h-6! w-6! text-gray-700! hover:text-gray-900! cursor-pointer"
                             onClick={openCart}
                         />
                     </Badge>

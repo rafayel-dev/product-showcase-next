@@ -46,7 +46,6 @@ export async function getProducts(
   try {
     const res = await fetch(
       `${API_URL}/products?page=${page}&limit=${limit}&isPublished=true`,
-      { next: { revalidate: 60 } },
     );
     if (!res.ok) throw new Error("Failed to fetch products");
     const data = await res.json();
@@ -59,9 +58,7 @@ export async function getProducts(
 
 export async function getProductById(id: string): Promise<Product | undefined> {
   try {
-    const res = await fetch(`${API_URL}/products/${id}`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(`${API_URL}/products/${id}`);
     if (!res.ok) return undefined;
     const data = await res.json();
     return mapProduct(data);
@@ -78,7 +75,6 @@ export async function getRelatedProducts(
   try {
     const response = await fetch(
       `${API_URL}/products/${currentId}/related?limit=${limit}`,
-      { next: { revalidate: 60 } },
     );
     if (!response.ok) {
       throw new Error("Failed to fetch related products");

@@ -260,7 +260,6 @@ const FloatingChat: React.FC = () => {
                     <AppButton
                         type="primary"
                         shape="circle"
-                        size="large"
                         onClick={toggleChat}
                         icon={
                             isOpen ? (

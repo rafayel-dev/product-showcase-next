@@ -3,9 +3,7 @@ import type { Slide } from "@/types";
 
 export async function getSliders(): Promise<Slide[]> {
   try {
-    const res = await fetch(`${API_URL}/sliders`, {
-      next: { revalidate: 300 },
-    });
+    const res = await fetch(`${API_URL}/sliders`);
     if (!res.ok) return [];
     const data = await res.json();
     return data.map((item: Record<string, unknown>) => ({

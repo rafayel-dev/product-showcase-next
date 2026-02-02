@@ -2,7 +2,6 @@ import React from "react";
 import PrivacyPolicyClient from "./PrivacyPolicyClient";
 import { getSettings } from "@/lib/settings/settingsApi";
 
-export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function PrivacyPolicyPage() {
     const data = await getSettings("privacy_policy");

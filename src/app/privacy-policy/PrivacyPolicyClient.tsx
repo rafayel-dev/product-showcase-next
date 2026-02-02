@@ -37,7 +37,7 @@ export default function PrivacyPolicyClient({ privacyContent }: PrivacyPolicyCli
             </div>
 
             {/* Content */}
-            <div className="max-w-4xl mx-auto px-4 -mt-10">
+            <div className="max-w-5xl mx-auto px-4 -mt-10">
                 <AppCard className="shadow-xl border-0! rounded-2xl p-8 md:p-12">
                     <div className="text-center mb-8">
                         <Text type="secondary" className="text-sm uppercase tracking-wider">
@@ -45,7 +45,7 @@ export default function PrivacyPolicyClient({ privacyContent }: PrivacyPolicyCli
                         </Text>
                     </div>
 
-                    <Paragraph className="text-lg text-gray-700 leading-relaxed mb-8">
+                    <Paragraph className="text-lg text-gray-700 leading-relaxed mb-8 text-center max-w-3xl mx-auto">
                         <strong>{STORE_NAME}</strong> আপনার ব্যক্তিগত তথ্যের গোপনীয়তা
                         রক্ষায় প্রতিশ্রুতিবদ্ধ। এই Privacy Policy ব্যাখ্যা করে আমরা কীভাবে
                         আপনার তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষা করি।

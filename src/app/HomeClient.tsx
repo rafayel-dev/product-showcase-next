@@ -104,7 +104,7 @@ export default function HomeClient({
 
                 {/* ================= PRODUCT LIST ================= */}
                 {loading && displayedProducts.length === 0 ? (
-                    <div className="flex justify-center items-center py-32">
+                    <div className="flex! justify-center! items-center! h-[50vh]!">
                         <AppSpin />
                     </div>
                 ) : displayedProducts.length === 0 ? (
