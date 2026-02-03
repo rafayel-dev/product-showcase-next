@@ -6,10 +6,10 @@ import { CheckCircleOutlined, DownloadOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import AppButton from "@/components/common/AppButton";
 import AppCard from "@/components/common/AppCard";
-import { formatCurrency } from "@/utils/price";
 import { getInvoiceBlob } from "@/lib/orders/ordersApi";
 import type { CartItem } from "@/types";
 import FloatingChat from "@/components/FloatingChat/FloatingChat";
+import AppSpin from "@/components/common/AppSpin";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -29,16 +29,20 @@ interface OrderData {
 export default function OrderSuccessClient() {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        const storedData = sessionStorage.getItem("orderData");
-        if (storedData) {
-            setOrderData(JSON.parse(storedData));
-            // Clear after reading
-            sessionStorage.removeItem("orderData");
-        }
+        const checkOrder = () => {
+            const storedData = sessionStorage.getItem("orderData");
+            if (storedData) {
+                setOrderData(JSON.parse(storedData));
+                sessionStorage.removeItem("orderData");
+            }
+            setLoading(false);
+            setMounted(true);
+        };
+        checkOrder();
     }, []);
 
     const handleDownloadInvoice = async () => {
@@ -62,9 +66,16 @@ export default function OrderSuccessClient() {
         }
     };
 
-    if (!mounted) {
-        return null;
+    if (!mounted || loading) {
+        return <AppSpin />;
     }
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat("en-BD", {
+            style: "currency",
+            currency: "BDT",
+        }).format(amount);
+    };
 
     if (!orderData) {
         return (
@@ -98,7 +109,7 @@ export default function OrderSuccessClient() {
                         }
                         subTitle={
                             <Paragraph className="text-gray-600">
-                                আপনার অর্ডার নম্বর: <Text strong copyable>#{orderData.orderId}</Text>
+                                আপনার অর্ডার নম্বর: <Text className="text-lg!" strong copyable>#{orderData.orderId}</Text>
                                 <br />
                                 আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।
                             </Paragraph>
@@ -119,6 +130,10 @@ export default function OrderSuccessClient() {
                                 <Text strong>{orderData.customerPhone}</Text>
                             </div>
                             <div className="flex justify-between">
+                                <Text type="secondary">Email</Text>
+                                <Text strong>{orderData.customerEmail}</Text>
+                            </div>
+                            <div className="flex justify-between">
                                 <Text type="secondary">Address</Text>
                                 <Text strong className="text-right max-w-[200px]">
                                     {orderData.address}
@@ -137,7 +152,7 @@ export default function OrderSuccessClient() {
                             {orderData.items.map((item, i) => (
                                 <div key={i} className="flex justify-between">
                                     <Text>
-                                        {item.title} x {item.quantity}
+                                        {item.title} <Text type="secondary">({item.quantity})</Text>
                                     </Text>
                                     <Text strong>{formatCurrency(item.price * item.quantity)}</Text>
                                 </div>

@@ -631,7 +631,7 @@ export default function ProductDetailClient({
                                             • ঢাকার বাইরে: 2–4 কর্মদিবস
                                             • Cash on Delivery available`}
                                     </Paragraph>
-                                </Col>
+                                </Col>  
 
                                 <Col xs={24} md={12}>
                                     <Title level={4}>↩ Return Policy</Title>
@@ -782,7 +782,7 @@ export default function ProductDetailClient({
                                             name="name"
                                             rules={[{ required: true, message: "নাম লিখুন" }]}
                                         >
-                                            <AppInput placeholder="আপনার নাম" />
+                                            <AppInput placeholder="আপনার নাম দিন" />
                                         </Form.Item>
 
                                         <Form.Item
@@ -790,13 +790,13 @@ export default function ProductDetailClient({
                                             name="orderId"
                                             rules={[{ required: true, message: "Order ID দিন" }]}
                                         >
-                                            <AppInput placeholder="যে Order ID দিয়ে কিনেছেন" />
+                                            <AppInput placeholder="Order শেষে যে ID পেয়েছিলেন" />
                                         </Form.Item>
 
                                         <Form.Item
                                             label="Rating"
                                             name="rating"
-                                            rules={[{ required: true, message: "Rating দিন" }]}
+                                            rules={[{ required: true, message: "রেটিং সিলেক্ট করুন" }]}
                                         >
                                             <Rate />
                                         </Form.Item>
@@ -804,7 +804,7 @@ export default function ProductDetailClient({
                                         <Form.Item
                                             label="Your Review"
                                             name="comment"
-                                            rules={[{ required: true, message: "রিভিউ লিখুন" }]}
+                                            rules={[{ required: true, message: "আপনার রিভিউ লিখুন" }]}
                                         >
                                             <AppInput.TextArea rows={4} placeholder="পণ্যের অভিজ্ঞতা লিখুন..." />
                                         </Form.Item>

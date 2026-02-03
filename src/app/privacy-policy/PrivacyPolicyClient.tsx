@@ -25,7 +25,7 @@ export default function PrivacyPolicyClient({ privacyContent }: PrivacyPolicyCli
     const lastUpdated = "February 1, 2026";
 
     return (
-        <div className="min-h-screen font-nunito pb-12 bg-gray-50">
+        <div className="min-h-screen font-nunito pb-12">
             {/* Header */}
             <div className="bg-gradient-to-r from-violet-600 to-indigo-700 text-white py-16 text-center">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">

@@ -27,10 +27,13 @@ import { FiX } from "react-icons/fi";
 import { validateCoupon } from "@/lib/checkout/checkoutApi";
 import { createOrder } from "@/lib/orders/ordersApi";
 import FloatingChat from "@/components/FloatingChat/FloatingChat";
+import { getSettings } from "@/lib/settings/settingsApi";
+import AppSpin from "@/components/common/AppSpin";
 
 const { Title, Text } = Typography;
 
-const DELIVERY_CHARGE = {
+// Fallback defaults
+const DEFAULT_DELIVERY_CHARGE = {
     dhaka: 80,
     outside: 150,
 };
@@ -52,6 +55,8 @@ export default function CheckoutClient() {
     const router = useRouter();
     const [form] = Form.useForm<CheckoutFormValues>();
     const [mounted, setMounted] = useState(false);
+    const [loadingSettings, setLoadingSettings] = useState(true);
+    const [deliveryCharges, setDeliveryCharges] = useState(DEFAULT_DELIVERY_CHARGE);
 
     const paymentMethod = useWatch("paymentMethod", form);
     const deliveryArea = useWatch("deliveryArea", form);
@@ -69,7 +74,20 @@ export default function CheckoutClient() {
     } | null>(null);
 
     useEffect(() => {
-        setMounted(true);
+        const loadSettings = async () => {
+            try {
+                const setting: any = await getSettings("delivery_charge");
+                if (setting && setting.value) {
+                    setDeliveryCharges(setting.value);
+                }
+            } catch (error) {
+                console.error("Failed to load delivery settings:", error);
+            } finally {
+                setLoadingSettings(false);
+                setMounted(true);
+            }
+        };
+        loadSettings();
     }, []);
 
     const subTotal = cartItems.reduce(
@@ -77,7 +95,7 @@ export default function CheckoutClient() {
         0
     );
 
-    const deliveryFee = deliveryArea ? DELIVERY_CHARGE[deliveryArea] : 0;
+    const deliveryFee = deliveryArea ? deliveryCharges[deliveryArea] : 0;
     const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
     const totalAmount = subTotal + deliveryFee - discount;
 
@@ -187,8 +205,8 @@ export default function CheckoutClient() {
         }
     };
 
-    if (!mounted) {
-        return null;
+    if (!mounted || loadingSettings) {
+        return <AppSpin />;
     }
 
     if (!cartItems.length) {
@@ -411,10 +429,10 @@ export default function CheckoutClient() {
                                     <Form.Item name="deliveryArea" rules={[{ required: true }]}>
                                         <Radio.Group disabled>
                                             <Radio value="dhaka">
-                                                Inside Dhaka {formatCurrency(DELIVERY_CHARGE.dhaka)}
+                                                Inside Dhaka {formatCurrency(deliveryCharges.dhaka)}
                                             </Radio>
                                             <Radio value="outside">
-                                                Outside Dhaka {formatCurrency(DELIVERY_CHARGE.outside)}
+                                                Outside Dhaka {formatCurrency(deliveryCharges.outside)}
                                             </Radio>
                                         </Radio.Group>
                                     </Form.Item>

@@ -7,6 +7,8 @@ export interface Slide {
 export interface Product {
   id: string;
   title: string;
+  size?: string;
+  color?: string;
   image: string;
   rating: number;
   price: number;

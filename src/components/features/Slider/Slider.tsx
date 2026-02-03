@@ -11,7 +11,7 @@ interface SliderProps {
 const Slider: React.FC<SliderProps> = ({ slides }) => {
     return (
         <div className="relative w-full overflow-hidden rounded-lg">
-            <Carousel autoplay dots={false}>
+            <Carousel autoplay dots={false} autoplaySpeed={7000}>
                 {slides.map((slide, index) => (
                     <div
                         key={index}
