@@ -150,15 +150,15 @@ export default function CheckoutClient() {
 
     const handlePlaceOrder = async (values: CheckoutFormValues) => {
         try {
+            // Simplified Payload: Backend calculates prices
             const orderPayload = {
                 orderItems: cartItems.map((item) => ({
-                    name: item.title,
-                    qty: item.quantity,
-                    image: item.image,
-                    price: item.price,
                     product: item.id,
+                    qty: item.quantity,
                     size: item.selectedSize,
                     color: item.selectedColor,
+                    name: item.title,
+                    image: item.image,
                 })),
                 shippingAddress: {
                     address: values.address,
@@ -166,10 +166,6 @@ export default function CheckoutClient() {
                     country: "Bangladesh",
                 },
                 paymentMethod: values.paymentMethod,
-                itemsPrice: subTotal,
-                taxPrice: 0,
-                shippingPrice: deliveryFee,
-                totalPrice: totalAmount,
                 customerInfo: {
                     name: values.fullName,
                     phone: values.phone,
@@ -182,18 +178,26 @@ export default function CheckoutClient() {
 
             toast.success("অর্ডার সফলভাবে প্লেস করা হয়েছে 🎉");
 
-            // Store order data in sessionStorage for order success page
+            // Store REAL order data from Server Response
             sessionStorage.setItem("orderData", JSON.stringify({
                 orderId: data.orderId || data._id,
-                total: totalAmount,
-                paymentMethod: values.paymentMethod,
+                total: data.totalPrice,
+                paymentMethod: data.paymentMethod,
                 address: values.address,
-                items: cartItems,
-                customerName: values.fullName,
-                customerPhone: values.phone,
-                customerEmail: values.email || "customer@email.com",
-                deliveryCharge: deliveryFee,
-                discount: discount,
+                items: data.orderItems.map((item: any) => ({
+                    id: item.product,
+                    title: item.name,
+                    price: item.price,
+                    quantity: item.qty,
+                    image: item.image,
+                    selectedSize: item.size,
+                    selectedColor: item.color,
+                })),
+                customerName: data.customerInfo?.name,
+                customerPhone: data.customerInfo?.phone,
+                customerEmail: data.customerInfo?.email,
+                deliveryCharge: data.shippingPrice,
+                discount: (data.itemsPrice + data.shippingPrice) - data.totalPrice,
             }));
 
             clearCart();

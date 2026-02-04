@@ -87,7 +87,7 @@ export default function AboutClient({ initialData }: { initialData: any }) {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-48 -mt-48"></div>
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -ml-48 -mb-48"></div>
 
-                <div className="relative max-w-7xl! mx-auto px-4 py-18 md:py-32 text-center z-10">
+                <div className="relative max-w-7xl! mx-auto px-4 py-18 md:py-32 md:pt-24 text-center z-10">
                     <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold mb-8 uppercase tracking-widest border border-white/20">EST. 2024</span>
                     <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-tight tracking-tight">
                         {aboutData?.title || <>We Are <span className="text-yellow-400 drop-shadow-sm">Product Showcase</span></>}
@@ -131,10 +131,10 @@ export default function AboutClient({ initialData }: { initialData: any }) {
                     <div className="relative order-1 lg:order-2">
                         <div className="absolute -inset-4 md:-inset-8 bg-gradient-to-tr from-violet-200 to-indigo-100 rounded-[2.5rem] transform md:rotate-3 -z-10"></div>
                         <Image priority src={aboutData?.coverImage ? getImageUrl(aboutData.coverImage) : "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1000&q=80"} alt="Our Office" width={600} height={500} className="relative rounded-[2rem] shadow-2xl w-full object-cover h-[300px] md:h-[450px] border-8 border-white" />
-                        <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-3xl shadow-2xl max-w-xs hidden md:block border border-gray-100 animate-bounce-slow">
-                            <p className="font-serif italic text-gray-600 text-lg">&quot;Quality is our signature, satisfaction is our legacy.&quot;</p>
-                            <div className="mt-4 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-violet-600"></div>
+                        <div className="absolute md:-bottom-10 -bottom-8 -left-2 md:-left-10 bg-white p-2 md:p-4 rounded-3xl shadow-xl md:w-xs w-54 animate-bounce-slow!">
+                            <p className="font-serif italic text-gray-600 text-sm text-center md:text-lg">&quot;Quality is our signature, satisfaction is our legacy.&quot;</p>
+                            <div className="mt-2 flex items-center gap-2">
+                                <div className="md:w-10 md:h-10 w-8 h-8 rounded-full shadow-lg bg-violet-600 border-3 border-white"></div>
                                 <div><p className="font-black text-gray-900 text-sm">CEO & Founder</p><p className="text-violet-600 font-bold text-xs uppercase tracking-tighter">Product Showcase</p></div>
                             </div>
                         </div>

@@ -677,7 +677,7 @@ export default function ProductDetailClient({
                                 <div className="relative group">
                                     <div
                                         ref={scrollContainerRef}
-                                        className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide scroll-smooth"
+                                        className="flex gap-4 overflow-x-hidden pb-6 snap-x snap-mandatory scrollbar-hide! scroll-smooth!"
                                         onScroll={(e) => {
                                             const target = e.currentTarget;
                                             if (
