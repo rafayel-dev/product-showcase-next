@@ -115,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
             <Link href={`/product/${id}`}>
                 <h5
-                    className="text-medium font-bold text-gray-900 hover:text-violet-500 transition-all duration-300 font-nunito truncate"
+                    className="text-base font-bold text-gray-900 hover:text-violet-500 transition-all duration-300 font-nunito truncate"
                     title={title}
                 >
                     {title}

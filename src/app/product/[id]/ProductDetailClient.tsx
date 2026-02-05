@@ -328,10 +328,10 @@ export default function ProductDetailClient({
                                         <Image
                                             key={i}
                                             src={img}
-                                            width={70}
+                                            // width={50}
                                             preview={false}
                                             onClick={() => setSelectedImage(img)}
-                                            className={`cursor-pointer rounded aspect-square object-cover ${selectedImage === img ? "border-1 border-violet-500" : ""
+                                            className={`cursor-pointer rounded  w-[40px]! md:w-[70px]! aspect-square object-cover ${selectedImage === img ? "border-1 border-violet-500" : ""
                                                 }`}
                                         />
                                     ))}
@@ -342,14 +342,14 @@ export default function ProductDetailClient({
                         {/* DETAILS */}
                         <Col xs={24} md={12}>
                             <AppCard bordered={false}>
-                                <Title level={2}>{product.title}</Title>
+                                <Title className="text-base! sm:text-lg! md:text-xl! lg:text-2xl!">{product.title}</Title>
                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <Rate
                                             disabled
                                             allowHalf
                                             value={product.rating}
-                                            className="text-xs! sm:text-sm! md:text-base!"
+                                            className="text-xs! sm:text-sm! md:text-base! lg:text-lg!"
                                         />
 
                                         <a href="#review">
@@ -372,7 +372,7 @@ export default function ProductDetailClient({
                                     <div className="flex items-center gap-2">
                                         {hasDiscount ? (
                                             <>
-                                                <Title level={4} className="text-red-500! m-0! md:text-2xl!">
+                                                <Title level={4} className="text-red-500! m-0! md:text-2xl! lg:text-3xl!">
                                                     ৳{finalPrice}
                                                 </Title>
                                                 <Text delete type="secondary" className="text-sm">
@@ -380,7 +380,7 @@ export default function ProductDetailClient({
                                                 </Text>
                                             </>
                                         ) : (
-                                            <Title level={4} className="text-red-500! m-0! md:text-2xl!">
+                                            <Title level={4} className="text-red-500! m-0! md:text-2xl! lg:text-3xl!">
                                                 ৳{product.price}
                                             </Title>
                                         )}
@@ -631,7 +631,7 @@ export default function ProductDetailClient({
                                             • ঢাকার বাইরে: 2–4 কর্মদিবস
                                             • Cash on Delivery available`}
                                     </Paragraph>
-                                </Col>  
+                                </Col>
 
                                 <Col xs={24} md={12}>
                                     <Title level={4}>↩ Return Policy</Title>
