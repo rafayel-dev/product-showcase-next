@@ -1,5 +1,5 @@
 import { getProducts } from "@/lib/products/productsApi";
-import { getSliders } from "@/lib/sliders/slidersApi";
+import { getSliders } from "@/lib/promotion/promotionApi";
 import { getCategories } from "@/lib/categories/categoriesApi";
 import { defaultSlides } from "@/data";
 import HomeClient from "./HomeClient";

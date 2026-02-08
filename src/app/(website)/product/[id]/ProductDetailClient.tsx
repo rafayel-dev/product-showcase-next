@@ -311,7 +311,7 @@ export default function ProductDetailClient({
                                     </div>
 
                                     {hasDiscount && (
-                                        <div className="absolute top-2 left-2 bg-violet-600/70 text-white backdrop-blur-sm text-xs font-semibold px-2 py-1 rounded font-nunito z-10">
+                                        <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-violet-600 to-purple-700 text-white px-2 py-1 rounded-full font-bold shadow-lg text-xs md:text-sm tracking-wide animate-pulse">
                                             🔥
                                             {product.discountType === "flat"
                                                 ? `৳${product.discountValue} Off`
@@ -331,7 +331,7 @@ export default function ProductDetailClient({
                                             // width={50}
                                             preview={false}
                                             onClick={() => setSelectedImage(img)}
-                                            className={`cursor-pointer rounded  w-[40px]! md:w-[70px]! aspect-square object-cover ${selectedImage === img ? "border-1 border-violet-500" : ""
+                                            className={`cursor-pointer rounded  w-[40px]! md:w-[70px]! aspect-square object-cover ${selectedImage === img ? "border border-violet-500" : ""
                                                 }`}
                                         />
                                     ))}
